@@ -1,54 +1,36 @@
-import axios from "axios";
-import type { FormValues, Note } from "../types/note";
+import axios from 'axios';
+import type { Note, FormValues } from '../types/note';
 
-interface NoteResponse {
-  notes: Note[]
-  totalPages: number
+export interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
 }
 
-export async function fetchNotes(search: string, page: number): Promise<NoteResponse> {
-    const url = 'https://notehub-public.goit.study/api/notes'
-    const options = {
-      headers: {
-        accept: 'application/json',
-        Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`
-      },
-      params: {
-          search: search,
-          page: page,
-          perPage: 12
-      }
-    }
+const instance = axios.create({
+  baseURL: 'https://notehub-public.goit.study/api',
+  headers: {
+    Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
+  },
+});
 
-  const response = await axios.get<NoteResponse>(url, options)
+export const fetchNotes = async (
+  search: string,
+  page: number
+): Promise<FetchNotesResponse> => {
+  const { data } = await instance.get('/notes', {
+    params: { search, page, perPage: 12 },
+  });
+  return data;
+};
 
-  return response.data
-}
+export const createNote = async (
+  values: FormValues
+): Promise<Note> => {
+  const { data } = await instance.post('/notes', values);
+  return data;
+};
 
-export async function createNote(objet: FormValues): Promise<Note> {
-  const url = 'https://notehub-public.goit.study/api/notes'
-  const options = {
-    headers: {
-      accept: 'application/json',
-      Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`
-    },
-  }
-
-  const response = await axios.post<Note>(url, objet, options)
-
-  return response.data
-}
-
-export async function deleteNote(id: string): Promise<Note> {
-  const url = `https://notehub-public.goit.study/api/notes/${id}`
-  const options = {
-    headers: {
-      accept: 'application/json',
-      Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`
-    },
-  }
-
-  const response = await axios.delete<Note>(url, options)
-
-  return response.data
-}
+export const deleteNote = async (id: string): Promise<Note> => {
+  const { data } = await instance.delete(`/notes/${id}`);
+  return data;
+};
